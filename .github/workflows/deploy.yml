@@ -1,0 +1,192 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: bloomium
+  REGION: us-central1
+  GCS_BUCKET: bloomium-tiles
+
+jobs:
+  build-and-deploy-api:
+    name: Build & Deploy API
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Build API image
+        run: |
+          docker build \
+            -f apps/api/Dockerfile \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-api:${{ github.sha }} \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-api:latest \
+            .
+
+      - name: Push API image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-api:${{ github.sha }}
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-api:latest
+
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy bloomium-api \
+            --image=gcr.io/${{ env.PROJECT_ID }}/bloomium-api:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=8080 \
+            --set-env-vars="MODE=cloud,GCS_BUCKET=${{ env.GCS_BUCKET }},GCP_PROJECT_ID=${{ env.PROJECT_ID }},GCP_REGION=${{ env.REGION }},API_PORT=8080" \
+            --memory=1Gi \
+            --cpu=1 \
+            --timeout=60s \
+            --min-instances=0 \
+            --max-instances=10
+
+  build-and-deploy-web:
+    name: Build & Deploy Web
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-api
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Get API URL
+        id: api_url
+        run: |
+          API_URL=$(gcloud run services describe bloomium-api \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "url=$API_URL" >> $GITHUB_OUTPUT
+
+      - name: Build Web image
+        run: |
+          docker build \
+            -f apps/web/Dockerfile \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-web:${{ github.sha }} \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-web:latest \
+            .
+
+      - name: Push Web image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-web:${{ github.sha }}
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-web:latest
+
+      - name: Deploy Web to Cloud Run
+        run: |
+          gcloud run deploy bloomium-web \
+            --image=gcr.io/${{ env.PROJECT_ID }}/bloomium-web:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=3000 \
+            --set-env-vars="NEXT_PUBLIC_API_URL=${{ steps.api_url.outputs.url }}" \
+            --memory=512Mi \
+            --cpu=1 \
+            --timeout=60s \
+            --min-instances=0 \
+            --max-instances=10
+
+  build-and-deploy-worker:
+    name: Build & Deploy Worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Build Worker image
+        run: |
+          docker build \
+            -f apps/worker/Dockerfile \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:${{ github.sha }} \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:latest \
+            .
+
+      - name: Push Worker image
+        run: |
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:${{ github.sha }}
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:latest
+
+      - name: Update Worker Job
+        run: |
+          gcloud run jobs update bloomium-worker \
+            --image=gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:${{ github.sha }} \
+            --region=${{ env.REGION }} || \
+          gcloud run jobs create bloomium-worker \
+            --image=gcr.io/${{ env.PROJECT_ID }}/bloomium-worker:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --set-env-vars="MODE=cloud,GCS_BUCKET=${{ env.GCS_BUCKET }},GCP_PROJECT_ID=${{ env.PROJECT_ID }},STORAGE_PATH=gs://${{ env.GCS_BUCKET }}" \
+            --memory=2Gi \
+            --cpu=2 \
+            --max-retries=3 \
+            --task-timeout=30m
+
+  notify:
+    name: Deployment Complete
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy-api, build-and-deploy-web, build-and-deploy-worker]
+    if: always()
+
+    steps:
+      - name: Check deployment status
+        run: |
+          if [ "${{ needs.build-and-deploy-api.result }}" == "success" ] && \
+             [ "${{ needs.build-and-deploy-web.result }}" == "success" ] && \
+             [ "${{ needs.build-and-deploy-worker.result }}" == "success" ]; then
+            echo "✅ All deployments successful!"
+            echo "🌐 Web: https://bloomium-web-569323643033.us-central1.run.app"
+            echo "🔌 API: https://bloomium-api-569323643033.us-central1.run.app"
+          else
+            echo "❌ Some deployments failed"
+            exit 1
+          fi
+
