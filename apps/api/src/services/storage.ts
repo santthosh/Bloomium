@@ -28,7 +28,7 @@ class StorageService {
     const tilePath = this.getTilePath(aoi_id, date, layer, z, x, y);
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, tilePath);
+      const fullPath = path.join(config.storagePath, tilePath);
       return await fs.readFile(fullPath);
     } else {
       // GCS mode
@@ -46,7 +46,7 @@ class StorageService {
     const metaPath = `${aoi_id}/${date}/meta.json`;
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, metaPath);
+      const fullPath = path.join(config.storagePath, metaPath);
       const content = await fs.readFile(fullPath, 'utf-8');
       return JSON.parse(content);
     } else {
@@ -64,7 +64,7 @@ class StorageService {
     const timeseriesPath = `${aoi_id}/${date}/timeseries.json`;
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, timeseriesPath);
+      const fullPath = path.join(config.storagePath, timeseriesPath);
       const content = await fs.readFile(fullPath, 'utf-8');
       return JSON.parse(content);
     } else {
@@ -82,7 +82,7 @@ class StorageService {
     const tilePath = this.getTilePath(aoi_id, date, layer, z, x, y);
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, tilePath);
+      const fullPath = path.join(config.storagePath, tilePath);
       try {
         await fs.access(fullPath);
         return true;
@@ -102,7 +102,7 @@ class StorageService {
    */
   async discoverDates(aoi_id: string): Promise<string[]> {
     if (isLocalMode()) {
-      const aoiPath = path.join(process.cwd(), config.storagePath, aoi_id);
+      const aoiPath = path.join(config.storagePath, aoi_id);
       try {
         const entries = await fs.readdir(aoiPath, { withFileTypes: true });
         return entries

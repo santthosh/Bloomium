@@ -47,8 +47,8 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                 alt="Bloomium Logo"
                 width={40}
                 height={40}
-                className="h-full w-auto object-contain"
-                style={{ maxHeight: '40px' }}
+                className="object-contain"
+                style={{ maxHeight: '40px', width: 'auto', height: 'auto' }}
                 priority
                 unoptimized
               />
@@ -62,8 +62,8 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                   alt="Bloomium"
                   width={75}
                   height={20}
-                  className="h-full w-auto object-contain"
-                  style={{ maxHeight: '20px' }}
+                  className="object-contain"
+                  style={{ maxHeight: '20px', width: 'auto', height: 'auto' }}
                   priority
                   unoptimized
                 />

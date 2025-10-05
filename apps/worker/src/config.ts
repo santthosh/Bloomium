@@ -2,16 +2,17 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
-
-// Get project root (3 levels up from dist or src)
+// Get project root: go up 3 levels from src dir (/app/apps/worker/src -> /app)
 const projectRoot = path.resolve(__dirname, '../../..');
+dotenv.config({ path: path.join(projectRoot, '.env.local') });
 
 export const config = {
   mode: process.env.MODE || 'local',
-  storagePath: process.env.STORAGE_PATH 
-    ? path.resolve(process.cwd(), process.env.STORAGE_PATH)
-    : path.join(projectRoot, 'local-data'),
+  storagePath: process.env.STORAGE_PATH && path.isAbsolute(process.env.STORAGE_PATH)
+    ? process.env.STORAGE_PATH  // Use absolute path as-is (e.g., /data in docker)
+    : process.env.STORAGE_PATH
+    ? path.resolve(projectRoot, process.env.STORAGE_PATH)  // Resolve relative to project root
+    : path.join(projectRoot, 'local-data'),  // Default
   gcs: {
     bucket: process.env.GCS_BUCKET || 'bloomium-tiles',
     projectId: process.env.GCP_PROJECT_ID || '',

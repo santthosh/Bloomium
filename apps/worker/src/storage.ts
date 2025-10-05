@@ -29,7 +29,7 @@ export class StorageWriter {
     const tilePath = `${aoi_id}/${date}/tiles/${layer}/${z}/${x}/${y}.png`;
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, tilePath);
+      const fullPath = path.join(config.storagePath, tilePath);
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.writeFile(fullPath, buffer);
     } else {
@@ -51,7 +51,7 @@ export class StorageWriter {
     const jsonPath = `${aoi_id}/${date}/${filename}`;
 
     if (isLocalMode()) {
-      const fullPath = path.join(process.cwd(), config.storagePath, jsonPath);
+      const fullPath = path.join(config.storagePath, jsonPath);
       await fs.mkdir(path.dirname(fullPath), { recursive: true });
       await fs.writeFile(fullPath, JSON.stringify(data, null, 2));
     } else {

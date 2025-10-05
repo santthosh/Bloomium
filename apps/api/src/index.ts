@@ -38,5 +38,7 @@ app.listen(config.port, () => {
   console.log(`🪷 Bloomium API running on port ${config.port}`);
   console.log(`   Mode: ${config.mode}`);
   console.log(`   Storage: ${config.mode === 'local' ? config.storagePath : config.gcs.bucket}`);
+  console.log(`   Storage Path (full): ${config.storagePath}`);
+  console.log(`   CWD: ${process.cwd()}`);
 });
 
