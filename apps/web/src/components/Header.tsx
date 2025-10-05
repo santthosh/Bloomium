@@ -50,6 +50,7 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                 className="h-full w-auto object-contain"
                 style={{ maxHeight: '40px' }}
                 priority
+                unoptimized
               />
             </div>
             
@@ -64,6 +65,7 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                   className="h-full w-auto object-contain"
                   style={{ maxHeight: '20px' }}
                   priority
+                  unoptimized
                 />
               </div>
               <p className="text-[12px] text-white/90 leading-tight mt-0.5 hidden sm:block">
