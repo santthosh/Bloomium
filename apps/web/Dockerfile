@@ -13,12 +13,14 @@ FROM base AS builder
 WORKDIR /app
 
 # Accept API URL as build argument
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
+
+# Create .env.production file with API URL
+RUN echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}" > apps/web/.env.production
 
 # Build the Next.js app
 WORKDIR /app/apps/web
