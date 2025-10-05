@@ -8,7 +8,7 @@ const router = Router();
 router.post('/aoi/resolve', asyncHandler(async (req, res) => {
   const { name, bbox } = AOIResolveRequestSchema.parse(req.body);
   
-  const aoi_id = await aoiService.resolveAOI(name, bbox);
+  const aoi_id = await aoiService.resolveAOI(name, bbox as [number, number, number, number] | undefined);
   
   res.json({
     aoi_id,
