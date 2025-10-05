@@ -1,0 +1,82 @@
+steps:
+  # Install dependencies
+  - name: 'node:20'
+    entrypoint: npm
+    args: ['install', '-g', 'pnpm@8']
+
+  # Build API
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/api/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-api:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-api:latest'
+      - '.'
+
+  # Build Web
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/web/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-web:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-web:latest'
+      - '.'
+
+  # Build Worker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/worker/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-worker:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/bloomium-worker:latest'
+      - '.'
+
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/bloomium-api']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/bloomium-web']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'gcr.io/$PROJECT_ID/bloomium-worker']
+
+  # Deploy API
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - gcloud
+      - run
+      - deploy
+      - bloomium-api
+      - --image=gcr.io/$PROJECT_ID/bloomium-api:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+
+  # Deploy Web
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      - gcloud
+      - run
+      - deploy
+      - bloomium-web
+      - --image=gcr.io/$PROJECT_ID/bloomium-web:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+
+images:
+  - 'gcr.io/$PROJECT_ID/bloomium-api:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/bloomium-web:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/bloomium-worker:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/bloomium-api:latest'
+  - 'gcr.io/$PROJECT_ID/bloomium-web:latest'
+  - 'gcr.io/$PROJECT_ID/bloomium-worker:latest'
+
+timeout: 1200s
+

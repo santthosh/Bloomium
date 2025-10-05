@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      - MODE=local
+      - API_PORT=3001
+      - STORAGE_PATH=/data
+    volumes:
+      - ./local-data:/data
+    networks:
+      - bloomium
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - api
+    networks:
+      - bloomium
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      - MODE=local
+      - STORAGE_PATH=/data
+    volumes:
+      - ./local-data:/data
+      - ./apps/worker/fixtures:/app/fixtures
+    command: --aoi /app/fixtures/demo-aoi-1.json
+    networks:
+      - bloomium
+
+networks:
+  bloomium:
+    driver: bridge
+

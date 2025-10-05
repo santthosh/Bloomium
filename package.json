@@ -1,0 +1,43 @@
+{
+  "name": "bloomium",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Global flowering phenology visualization platform",
+  "scripts": {
+    "dev:web": "pnpm --filter @bloomium/web dev",
+    "dev:api": "pnpm --filter @bloomium/api dev",
+    "dev:worker": "cd apps/worker && pnpm dev",
+    "dev:all": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
+    "generate:demo": "pnpm --filter @bloomium/worker dev:demo",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @bloomium/web build",
+    "build:api": "pnpm --filter @bloomium/api build",
+    "build:worker": "pnpm --filter @bloomium/worker build",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "keywords": [
+    "phenology",
+    "earth-observation",
+    "sentinel-2",
+    "bloom-detection"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "Your Name",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/bloomium"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}
+
