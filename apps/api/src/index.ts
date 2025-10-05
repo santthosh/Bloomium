@@ -6,6 +6,7 @@ import { errorHandler } from './middleware/errorHandler';
 // Routes
 import healthRouter from './routes/health';
 import aoiRouter from './routes/aoi';
+import metadataRouter from './routes/metadata';
 import tilesRouter from './routes/tiles';
 import timeseriesRouter from './routes/timeseries';
 import explainRouter from './routes/explain';
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use(healthRouter);
 app.use(aoiRouter);
+app.use(metadataRouter);
 app.use(tilesRouter);
 app.use(timeseriesRouter);
 app.use(explainRouter);

@@ -3,15 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
+  --petal-pink: #E573A7;
+  --leaf-green: #4CAF50;
+  --sky-blue: #42A5F5;
+  --space-navy: #1A237E;
+  --foreground-rgb: 26, 35, 126; /* Space Navy */
   --background-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-rgb: 15, 15, 15;
-  }
 }
 
 body {
@@ -23,9 +20,76 @@ body {
 /* Leaflet overrides */
 .leaflet-container {
   font-family: inherit;
+  background: #E3F2FD; /* Light sky blue for water */
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.15);
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--petal-pink);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #DF4589;
+}
+
+/* Custom range slider */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--leaf-green);
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #388E3C;
+  transform: scale(1.1);
+}
+
+.slider::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--leaf-green);
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #388E3C;
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb:active {
+  transform: scale(0.95);
 }
 

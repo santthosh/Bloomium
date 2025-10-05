@@ -43,7 +43,7 @@ export default function MapView({ layer, date, aoiId }: MapViewProps) {
       <MapContainer
         center={[38.4, -121.25]}
         zoom={9}
-        className="h-full w-full"
+        className="h-full w-full relative z-0"
         zoomControl={true}
       >
         <TileLayer

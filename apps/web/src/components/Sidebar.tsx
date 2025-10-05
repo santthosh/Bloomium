@@ -6,16 +6,10 @@ interface SidebarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
   aoiId: string;
+  availableDates: string[];
+  isOpen?: boolean;
+  onClose?: () => void;
 }
-
-const AVAILABLE_DATES = [
-  '2025-08-01',
-  '2025-08-08',
-  '2025-08-15',
-  '2025-08-22',
-  '2025-09-01',
-  '2025-09-08',
-];
 
 export default function Sidebar({
   selectedLayer,
@@ -23,38 +17,68 @@ export default function Sidebar({
   selectedDate,
   onDateChange,
   aoiId,
+  availableDates,
+  isOpen = false,
+  onClose,
 }: SidebarProps) {
+  const handleLayerChange = (layer: Layer) => {
+    onLayerChange(layer);
+    if (onClose && window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
+  const handleDateChange = (date: string) => {
+    onDateChange(date);
+    if (onClose && window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
-      <div className="p-6 space-y-6">
+    <aside
+      className={`
+        fixed lg:relative
+        w-80 h-full
+        bg-gradient-to-b from-white to-sky-blue-50 
+        border-r border-sky-blue-200 
+        overflow-y-auto shadow-inner
+        transition-transform duration-300 ease-in-out
+        z-30
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}
+    >
+      <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
         {/* Layer Selection */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Layer</h2>
+          <h2 className="text-base font-semibold text-space-navy mb-3">
+            Layer
+          </h2>
           <div className="space-y-2">
             <button
-              onClick={() => onLayerChange('bloom')}
-              className={`w-full px-4 py-3 rounded-lg text-left transition-all ${
+              onClick={() => handleLayerChange('bloom')}
+              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
                 selectedLayer === 'bloom'
-                  ? 'bg-bloom-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-petal-pink to-petal-pink-400 text-white shadow-lg'
+                  : 'bg-white text-space-navy hover:bg-petal-pink-50 border border-petal-pink-200'
               }`}
             >
-              <div className="font-medium">Bloom Probability</div>
-              <div className="text-sm opacity-90">
+              <div className="text-sm font-medium">🌸 Bloom Probability</div>
+              <div className="text-xs opacity-90">
                 {selectedLayer === 'bloom' ? 'Active' : 'Show bloom patterns'}
               </div>
             </button>
             
             <button
-              onClick={() => onLayerChange('anomaly')}
-              className={`w-full px-4 py-3 rounded-lg text-left transition-all ${
+              onClick={() => handleLayerChange('anomaly')}
+              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
                 selectedLayer === 'anomaly'
-                  ? 'bg-bloom-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-sky-blue to-sky-blue-600 text-white shadow-lg'
+                  : 'bg-white text-space-navy hover:bg-sky-blue-50 border border-sky-blue-200'
               }`}
             >
-              <div className="font-medium">Anomaly (Z-Score)</div>
-              <div className="text-sm opacity-90">
+              <div className="text-sm font-medium">📊 Anomaly (Z-Score)</div>
+              <div className="text-xs opacity-90">
                 {selectedLayer === 'anomaly' ? 'Active' : 'Show anomalies'}
               </div>
             </button>
@@ -62,74 +86,125 @@ export default function Sidebar({
         </div>
 
         {/* Date Selection */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Date</h2>
-          <select
-            value={selectedDate}
-            onChange={(e) => onDateChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bloom-500 focus:border-bloom-500"
-          >
-            {AVAILABLE_DATES.map((date) => (
-              <option key={date} value={date}>
-                {new Date(date).toLocaleDateString('en-US', {
+        <div className="pt-4 border-t border-sky-blue-200">
+          <h2 className="text-base font-semibold text-space-navy mb-3">
+            Date
+          </h2>
+          <div className="space-y-3">
+            {/* Selected Date Display */}
+            <div className="bg-white border-2 border-leaf-green-200 rounded-xl px-4 py-3 text-center">
+              <div className="text-xs text-space-navy-600 font-medium">Selected Date</div>
+              <div className="text-sm font-bold text-space-navy mt-1">
+                {new Date(selectedDate).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
-              </option>
-            ))}
-          </select>
+              </div>
+            </div>
+
+            {/* Slider */}
+            <div className="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max={availableDates.length - 1}
+                value={availableDates.indexOf(selectedDate)}
+                onChange={(e) => handleDateChange(availableDates[parseInt(e.target.value)])}
+                className="w-full h-2 bg-leaf-green-200 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #4CAF50 0%, #4CAF50 ${(availableDates.indexOf(selectedDate) / (availableDates.length - 1)) * 100}%, #A5D6A7 ${(availableDates.indexOf(selectedDate) / (availableDates.length - 1)) * 100}%, #A5D6A7 100%)`
+                }}
+              />
+              <div className="flex justify-between text-[10px] text-space-navy-600">
+                <span>{new Date(availableDates[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                <span>{new Date(availableDates[availableDates.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  const currentIndex = availableDates.indexOf(selectedDate);
+                  if (currentIndex > 0) {
+                    handleDateChange(availableDates[currentIndex - 1]);
+                  }
+                }}
+                disabled={availableDates.indexOf(selectedDate) === 0}
+                className="flex-1 px-3 py-2 bg-white border border-leaf-green-200 rounded-lg text-xs font-medium text-space-navy hover:bg-leaf-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => {
+                  const currentIndex = availableDates.indexOf(selectedDate);
+                  if (currentIndex < availableDates.length - 1) {
+                    handleDateChange(availableDates[currentIndex + 1]);
+                  }
+                }}
+                disabled={availableDates.indexOf(selectedDate) === availableDates.length - 1}
+                className="flex-1 px-3 py-2 bg-white border border-leaf-green-200 rounded-lg text-xs font-medium text-space-navy hover:bg-leaf-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* AOI Info */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Area of Interest</h2>
-          <div className="px-4 py-3 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-600">AOI ID</div>
-            <div className="font-mono text-sm text-gray-900">{aoiId}</div>
+        <div className="pt-4 border-t border-sky-blue-200">
+          <h2 className="text-base font-semibold text-space-navy mb-3">
+            Area of Interest
+          </h2>
+          <div className="px-4 py-3 bg-white rounded-xl border border-sky-blue-200 shadow-sm">
+            <div className="text-[10px] text-space-navy-600 font-medium">AOI ID</div>
+            <div className="font-mono text-xs text-space-navy font-bold">{aoiId}</div>
           </div>
         </div>
 
         {/* Legend */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Legend</h2>
+        <div className="pt-4 border-t border-sky-blue-200">
+          <h2 className="text-base font-semibold text-space-navy mb-3">
+            Legend
+          </h2>
           {selectedLayer === 'bloom' ? (
-            <div className="space-y-2">
+            <div className="space-y-2 bg-white p-3 rounded-xl border border-petal-pink-200">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-4 bg-blue-500 rounded"></div>
-                <span className="text-sm text-gray-700">Low probability</span>
+                <div className="w-8 h-4 bg-sky-blue rounded"></div>
+                <span className="text-xs text-space-navy font-medium">Low probability</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-4 bg-yellow-500 rounded"></div>
-                <span className="text-sm text-gray-700">Moderate</span>
+                <div className="w-8 h-4 bg-leaf-green rounded"></div>
+                <span className="text-xs text-space-navy font-medium">Moderate</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-4 bg-red-500 rounded"></div>
-                <span className="text-sm text-gray-700">High probability</span>
+                <div className="w-8 h-4 bg-petal-pink rounded"></div>
+                <span className="text-xs text-space-navy font-medium">High probability</span>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 bg-white p-3 rounded-xl border border-sky-blue-200">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-4 bg-purple-500 rounded"></div>
-                <span className="text-sm text-gray-700">Below normal</span>
+                <div className="w-8 h-4 bg-space-navy-700 rounded"></div>
+                <span className="text-xs text-space-navy font-medium">Below normal</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-4 bg-gray-300 rounded"></div>
-                <span className="text-sm text-gray-700">Normal</span>
+                <span className="text-xs text-space-navy font-medium">Normal</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-4 bg-orange-500 rounded"></div>
-                <span className="text-sm text-gray-700">Above normal</span>
+                <div className="w-8 h-4 bg-petal-pink rounded"></div>
+                <span className="text-xs text-space-navy font-medium">Above normal</span>
               </div>
             </div>
           )}
         </div>
 
         {/* Info */}
-        <div className="pt-4 border-t border-gray-200">
-          <p className="text-xs text-gray-500 leading-relaxed">
-            Click anywhere on the map to view time series data and explanations for that location.
+        <div className="pt-4 border-t border-sky-blue-200">
+          <p className="text-[10px] text-space-navy-700 leading-relaxed bg-leaf-green-50 p-3 rounded-lg border-l-4 border-leaf-green">
+            💡 <strong>Tip:</strong> Click anywhere on the map to view time series data and explanations for that location.
           </p>
         </div>
       </div>

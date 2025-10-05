@@ -2,6 +2,23 @@ import { TimeseriesData, ExplainData } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+export interface AOIMetadata {
+  aoi_id: string;
+  name?: string;
+  bbox: [number, number, number, number];
+  dates: string[];
+}
+
+export async function fetchAOIMetadata(aoiId: string): Promise<AOIMetadata> {
+  const response = await fetch(`${API_URL}/aoi/${aoiId}/metadata`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch AOI metadata');
+  }
+  
+  return response.json();
+}
+
 export async function fetchTimeseries(
   lat: number,
   lon: number,
