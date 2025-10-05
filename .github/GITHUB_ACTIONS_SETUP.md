@@ -100,31 +100,27 @@ git push origin main
 ### Option B: Manual Trigger
 
 1. Go to **Actions** tab in GitHub
-2. Select **Deploy to Google Cloud (Parallel)**
+2. Select **Deploy to Google Cloud**
 3. Click **Run workflow** → **Run workflow**
 
 ---
 
-## Workflows Available
+## Workflow Overview
 
-### 1. `deploy.yml` (Sequential)
+### `deploy.yml`
 
-Deploys services one after another:
-- ✅ Safer for dependencies
-- ✅ Clear failure isolation
-- ❌ Slower (builds serially)
+The deployment workflow builds and deploys all services efficiently:
+- ✅ **Parallel image builds** - All 3 images build simultaneously (~3x faster)
+- ✅ **Smart dependencies** - API deploys first, then Web (needs API URL) and Worker in parallel
+- ✅ **Efficient resource usage** - Uses GitHub's parallel runners
+- ✅ **Clear status** - Matrix strategy shows each service separately
+- ✅ **Fast feedback** - Fails fast if any build fails
 
-**When to use:** Production deployments where you want guaranteed order
-
-### 2. `deploy-parallel.yml` (Parallel - Recommended)
-
-Builds all images in parallel, then deploys:
-- ✅ Much faster (~3x)
-- ✅ Efficient resource usage
-- ✅ Still respects API → Web dependency
-- ✅ Better for frequent deployments
-
-**When to use:** Regular development deployments
+**Architecture:**
+1. Build all images in parallel (API, Web, Worker)
+2. Deploy API first
+3. Deploy Web (using API URL) and Worker in parallel
+4. Generate deployment summary
 
 ---
 
