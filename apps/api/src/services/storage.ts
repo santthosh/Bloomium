@@ -114,16 +114,17 @@ class StorageService {
       }
     } else {
       const bucket = this.storage!.bucket(config.gcs.bucket);
+      // List all meta.json files for this AOI
       const [files] = await bucket.getFiles({
         prefix: `${aoi_id}/`,
-        delimiter: '/',
+        matchGlob: '**/meta.json',
       });
       
-      // Extract unique date directories
+      // Extract dates from paths like: demo-aoi-1/2025-08-01/meta.json
       const dates = new Set<string>();
       files.forEach(file => {
         const parts = file.name.split('/');
-        if (parts.length >= 2 && parts[1]) {
+        if (parts.length === 3 && parts[1]) {
           dates.add(parts[1]);
         }
       });
