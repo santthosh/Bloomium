@@ -58,6 +58,12 @@ steps:
       - --image=gcr.io/$PROJECT_ID/bloomium-api:$COMMIT_SHA
       - --region=us-central1
       - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars=MODE=cloud,GCS_BUCKET=bloomium-tiles,GCP_PROJECT_ID=$PROJECT_ID
+      - --memory=512Mi
+      - --cpu=1
+      - --timeout=60
+      - --max-instances=10
 
   # Deploy Web
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -69,6 +75,12 @@ steps:
       - --image=gcr.io/$PROJECT_ID/bloomium-web:$COMMIT_SHA
       - --region=us-central1
       - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars=NEXT_PUBLIC_API_URL=https://api.bloomium.space
+      - --memory=512Mi
+      - --cpu=1
+      - --timeout=60
+      - --max-instances=10
 
 images:
   - 'gcr.io/$PROJECT_ID/bloomium-api:$COMMIT_SHA'
