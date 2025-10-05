@@ -12,9 +12,9 @@ env:
   GCS_BUCKET: bloomium-tiles
 
 jobs:
-  # Build all images in parallel
-  build-images:
-    name: Build All Images
+  # Build API and Worker in parallel (Web needs API URL first)
+  build-backend-images:
+    name: Build ${{ matrix.service }} Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,7 +22,7 @@ jobs:
     
     strategy:
       matrix:
-        service: [api, web, worker]
+        service: [api, worker]
     
     steps:
       - name: Checkout code
@@ -49,11 +49,11 @@ jobs:
           docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-${{ matrix.service }}:${{ github.sha }}
           docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-${{ matrix.service }}:latest
 
-  # Deploy API first (Web depends on API URL)
+  # Deploy API first to get its URL
   deploy-api:
     name: Deploy API
     runs-on: ubuntu-latest
-    needs: build-images
+    needs: build-backend-images
     permissions:
       contents: read
       id-token: write
@@ -89,12 +89,49 @@ jobs:
             --region=${{ env.REGION }} \
             --format='value(status.url)')
           echo "url=$API_URL" >> $GITHUB_OUTPUT
+          echo "✅ API deployed at: $API_URL"
+
+  # Build Web image WITH the API URL
+  build-web-image:
+    name: Build Web Image
+    runs-on: ubuntu-latest
+    needs: deploy-api
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io
+
+      - name: Build and Push Web image with API URL
+        run: |
+          echo "Building Web with API_URL=${{ needs.deploy-api.outputs.api_url }}"
+          docker build \
+            -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=${{ needs.deploy-api.outputs.api_url }} \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-web:${{ github.sha }} \
+            -t gcr.io/${{ env.PROJECT_ID }}/bloomium-web:latest \
+            .
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-web:${{ github.sha }}
+          docker push gcr.io/${{ env.PROJECT_ID }}/bloomium-web:latest
 
   # Deploy Web and Worker in parallel
   deploy-web:
     name: Deploy Web
     runs-on: ubuntu-latest
-    needs: deploy-api
+    needs: [deploy-api, build-web-image]
     permissions:
       contents: read
       id-token: write
@@ -116,17 +153,17 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --port=3000 \
-            --set-env-vars="NEXT_PUBLIC_API_URL=${{ needs.deploy-api.outputs.api_url }}" \
             --memory=512Mi \
             --cpu=1 \
             --timeout=60s \
             --min-instances=0 \
             --max-instances=10
+          echo "✅ Web deployed"
 
   deploy-worker:
     name: Deploy Worker
     runs-on: ubuntu-latest
-    needs: build-images
+    needs: build-backend-images
     permissions:
       contents: read
       id-token: write
@@ -153,6 +190,7 @@ jobs:
             --cpu=2 \
             --max-retries=3 \
             --task-timeout=30m
+          echo "✅ Worker updated"
 
   summary:
     name: Deployment Summary
@@ -184,4 +222,3 @@ jobs:
             echo "### ❌ Some deployments failed" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-

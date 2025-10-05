@@ -96,6 +96,41 @@ class StorageService {
       return exists;
     }
   }
+
+  /**
+   * Discover available dates for an AOI by listing storage directories
+   */
+  async discoverDates(aoi_id: string): Promise<string[]> {
+    if (isLocalMode()) {
+      const aoiPath = path.join(process.cwd(), config.storagePath, aoi_id);
+      try {
+        const entries = await fs.readdir(aoiPath, { withFileTypes: true });
+        return entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => entry.name)
+          .sort();
+      } catch {
+        return [];
+      }
+    } else {
+      const bucket = this.storage!.bucket(config.gcs.bucket);
+      const [files] = await bucket.getFiles({
+        prefix: `${aoi_id}/`,
+        delimiter: '/',
+      });
+      
+      // Extract unique date directories
+      const dates = new Set<string>();
+      files.forEach(file => {
+        const parts = file.name.split('/');
+        if (parts.length >= 2 && parts[1]) {
+          dates.add(parts[1]);
+        }
+      });
+      
+      return Array.from(dates).sort();
+    }
+  }
 }
 
 export const storageService = new StorageService();
