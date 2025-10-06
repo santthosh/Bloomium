@@ -2,13 +2,18 @@ import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs-extra';
 import proj4 from 'proj4';
+import { Storage } from '@google-cloud/storage';
 import { Grid, TileCoord, BBox } from './types';
 import { config } from './config';
 import { tileBoundsXYZ, mercatorToLonLat, getTilesForBBox } from './reproj';
 import { rgbaFromScore, rgbaFromZ } from './color';
 
+// Initialize GCS client
+const storage = new Storage();
+const bucket = storage.bucket(config.gcs.bucket);
+
 /**
- * Write a single PNG tile
+ * Write a single PNG tile (local and/or GCS)
  */
 export async function writeTile(
   pixels: Uint8ClampedArray,
@@ -16,9 +21,10 @@ export async function writeTile(
   width = config.tiles.size,
   height = config.tiles.size
 ): Promise<void> {
+  // Write locally first
   await fs.ensureDir(path.dirname(outPath));
 
-  await sharp(Buffer.from(pixels.buffer), {
+  const pngBuffer = await sharp(Buffer.from(pixels.buffer), {
     raw: {
       width,
       height,
@@ -26,7 +32,23 @@ export async function writeTile(
     },
   })
     .png()
-    .toFile(outPath);
+    .toBuffer();
+
+  await fs.writeFile(outPath, pngBuffer);
+
+  // If cloud mode, also upload to GCS
+  if (config.mode === 'cloud') {
+    // Convert local path to GCS path (remove leading project root)
+    const relativePath = outPath.replace(config.storagePath + '/', '');
+    const gcsPath = relativePath;
+    
+    await bucket.file(gcsPath).save(pngBuffer, {
+      contentType: 'image/png',
+      metadata: {
+        cacheControl: 'public, max-age=3600',
+      },
+    });
+  }
 }
 
 /**

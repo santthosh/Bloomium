@@ -1,7 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
+import { Storage } from '@google-cloud/storage';
 import { Grid, BBox, TimeseriesPoint } from './types';
 import { config } from './config';
+
+const storage = new Storage();
+const bucket = storage.bucket(config.gcs.bucket);
 
 /**
  * Pick sample points within AOI for timeseries tracking
@@ -109,6 +113,18 @@ export async function updateTimeseries(
   const sorted = Array.from(uniqueDates.values()).sort((a, b) => a.date.localeCompare(b.date));
 
   await fs.writeJSON(timeseriesPath, sorted, { spaces: 2 });
+  
+  // Upload to GCS if in cloud mode
+  if (config.mode === 'cloud') {
+    const gcsPath = `${aoiId}/${date}/timeseries.json`;
+    await bucket.file(gcsPath).save(JSON.stringify(sorted, null, 2), {
+      contentType: 'application/json',
+      metadata: {
+        cacheControl: 'public, max-age=300',
+      },
+    });
+  }
+  
   console.log(`      ✓ Updated timeseries.json (${sorted.length} points)`);
 }
 
