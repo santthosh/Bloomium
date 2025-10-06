@@ -24,9 +24,9 @@ export const AVAILABLE_AOIS: AOIConfig[] = [
   {
     id: 'south-africa-wine-lands',
     name: 'South Africa Wine Lands',
-    center: [-33.75, 19.25],
-    zoom: 9,
-    bbox: [19.0, -34.0, 19.5, -33.5],
+    center: [-33.9, 19.0],
+    zoom: 10,
+    bbox: [18.8, -34.1, 19.2, -33.7],
   },
 ];
 
