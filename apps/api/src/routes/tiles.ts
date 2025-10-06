@@ -26,7 +26,7 @@ router.get('/tiles/:layer/:z/:x/:y', asyncHandler(async (req, res) => {
     const tileBuffer = await storageService.readTile(aoi_id, date, layer, zNum, xNum, yNum);
     
     res.set('Content-Type', 'image/png');
-    res.set('Cache-Control', 'public, max-age=86400'); // 24 hours
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.send(tileBuffer);
   } catch (error) {
     throw new AppError(404, `Tile not found: ${layer}/${z}/${x}/${y}`);

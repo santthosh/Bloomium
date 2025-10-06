@@ -51,7 +51,11 @@ export default function MapView({ layer, date, aoiId }: MapViewProps) {
   };
 
   const tileUrl = getTileUrl(layer, aoiId, date);
-  const aoiConfig = getAOIConfig(aoiId) || { center: [38.4, -121.25] as [number, number], zoom: 10 };
+  const aoiConfig = getAOIConfig(aoiId) || { 
+    center: [38.4, -121.25] as [number, number], 
+    zoom: 10, 
+    bbox: [-121.5, 38.2, -121.0, 38.6] as [number, number, number, number]
+  };
 
   return (
     <>
