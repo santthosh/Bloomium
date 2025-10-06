@@ -255,32 +255,12 @@ curl "http://localhost:3001/explain?lat=38.4&lon=-121.25&date=2025-09-01"
 
 ---
 
-## 🧪 Demo Data
+## 🤝 Contributing & Future Work
 
-The worker generates demo tiles with gradient patterns. To customize:
-
-1. Edit `apps/worker/fixtures/demo-aoi-1.json`
-2. Change bbox coordinates and dates
-3. Run worker to regenerate tiles
-
-For real satellite data integration, see `SYSTEM_DESIGN.md` for Sentinel-2 integration details.
-
----
-
-## 📖 Documentation
-
-- [REQUIREMENTS.md](./REQUIREMENTS.md) - Full project specification
-- [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md) - Architecture and deployment topology
-
----
-
-## 🤝 Contributing
-
-This is a demonstration project. For production use:
-1. Integrate real Sentinel-2 data processing
-2. Implement proper authentication
-3. Add rate limiting and caching
-4. Set up monitoring and alerting
+1. Implement proper authentication
+2. Add rate limiting and caching
+3. Set up monitoring and alerting
+4. Crowdsourced ground truth
 
 ---
 
