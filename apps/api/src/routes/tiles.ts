@@ -19,8 +19,8 @@ router.get('/tiles/:layer/:z/:x/:y', asyncHandler(async (req, res) => {
 
   // For demo, use default AOI and date
   // TODO: Add query params for aoi_id and date selection
-  const aoi_id = req.query.aoi_id as string || 'demo-aoi-1';
-  const date = req.query.date as string || '2025-09-01';
+  const aoi_id = req.query.aoi_id as string || 'california-central-valley';
+  const date = req.query.date as string || '2025-08-01';
 
   try {
     const tileBuffer = await storageService.readTile(aoi_id, date, layer, zNum, xNum, yNum);

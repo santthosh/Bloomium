@@ -17,6 +17,20 @@ export const config = {
     bucket: process.env.GCS_BUCKET || 'bloomium-tiles',
     projectId: process.env.GCP_PROJECT_ID || '',
   },
+  stac: {
+    endpoint: process.env.STAC_ENDPOINT || 'https://earth-search.aws.element84.com/v1',
+    dataSource: process.env.DATA_SOURCE || 'earth-search',
+  },
+  tiles: {
+    zMin: parseInt(process.env.TILE_Z_MIN || '7'),
+    zMax: parseInt(process.env.TILE_Z_MAX || '14'),
+    size: 256,
+  },
+  processing: {
+    maxScenesPerWeek: parseInt(process.env.MAX_SCENES_PER_WEEK || '2'),
+    downloadConcurrency: parseInt(process.env.DOWNLOAD_CONCURRENCY || '3'),
+    epsilon: parseFloat(process.env.EPSILON || '1e-4'),
+  },
 };
 
 export const isCloudMode = () => config.mode === 'cloud';

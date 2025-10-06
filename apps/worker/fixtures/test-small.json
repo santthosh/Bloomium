@@ -1,0 +1,9 @@
+{
+  "aoi_id": "test-small",
+  "name": "Small Test AOI - Sacramento",
+  "bbox": [-121.55, 38.45, -121.40, 38.60],
+  "dates": [
+    "2025-09-01"
+  ]
+}
+

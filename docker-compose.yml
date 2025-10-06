@@ -39,7 +39,7 @@ services:
     volumes:
       - ./local-data:/data
       - ./apps/worker/fixtures:/app/fixtures
-    command: --aoi /app/fixtures/demo-aoi-1.json
+    command: --aoi /app/fixtures/california-central-valley.json
     networks:
       - bloomium
 

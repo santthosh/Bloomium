@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvents, useMap, Rectangle } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import { Layer } from '@/types';
 import { getTileUrl } from '@/lib/api';
@@ -70,6 +70,19 @@ export default function MapView({ layer, date, aoiId }: MapViewProps) {
           url={tileUrl}
           opacity={0.7}
           key={`${layer}-${date}-${aoiId}`}
+        />
+
+        <Rectangle
+          bounds={[
+            [aoiConfig.bbox[1], aoiConfig.bbox[0]], // [south, west]
+            [aoiConfig.bbox[3], aoiConfig.bbox[2]]  // [north, east]
+          ]}
+          pathOptions={{ 
+            color: '#FFD700', 
+            weight: 3, 
+            fillOpacity: 0,
+            dashArray: '10, 5'
+          }}
         />
 
         <MapClickHandler onMapClick={handleMapClick} />

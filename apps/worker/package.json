@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "tsx src/index.ts",
-    "dev:demo": "tsx src/index.ts --aoi fixtures/demo-aoi-1.json",
+    "dev:demo": "tsx src/index.ts --aoi fixtures/california-central-valley.json",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
@@ -19,10 +19,18 @@
     "sharp": "^0.33.2",
     "commander": "^11.1.0",
     "dotenv": "^16.4.1",
-    "@google-cloud/storage": "^7.7.0"
+    "@google-cloud/storage": "^7.7.0",
+    "geotiff": "^2.1.3",
+    "proj4": "^2.11.0",
+    "fs-extra": "^11.2.0",
+    "yargs": "^17.7.2",
+    "zod": "^3.22.4",
+    "undici": "^6.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@types/yargs": "^17.0.32",
+    "@types/fs-extra": "^11.0.4",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
