@@ -1,7 +1,7 @@
 {
   "aoi_id": "japan-agricultural",
   "name": "Japan Agricultural Regions",
-  "bbox": [139.0, 35.0, 140.5, 36.5],
+  "bbox": [139.5, 35.5, 140.0, 36.0],
   "dates": [
     "2025-08-01",
     "2025-08-08",
