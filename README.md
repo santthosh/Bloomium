@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="apps/web/public/bloomium-logo-flower.png" alt="Bloomium Logo" width="300"/>
+<img src="apps/web/public/bloomium-logo-flower.png" alt="Bloomium Logo" width="200"/>
 
 # 🪷 Bloomium
 
