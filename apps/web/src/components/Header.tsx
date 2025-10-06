@@ -69,7 +69,7 @@ export default function Header({ sidebarOpen, onToggleSidebar }: HeaderProps) {
                 />
               </div>
               <p className="text-[12px] text-white/90 leading-tight mt-0.5 hidden sm:block">
-                Mapping Earth's Seasons, One Bloom at a Time.
+                Global Flowering Phenology
               </p>
             </div>
           </div>

@@ -83,7 +83,17 @@ export function deltaWeek(curr: Grid, prev?: Grid): Grid {
  */
 export function zScore(curr: Grid, base: Baseline, eps = 1e-6): Grid {
   if (curr.width !== base.mean.width || curr.height !== base.mean.height) {
-    throw new Error('Current and baseline grids must have same dimensions');
+    console.warn(`      ⚠️  Grid dimension mismatch (${curr.width}×${curr.height} vs ${base.mean.width}×${base.mean.height}), returning zeros`);
+    // Return zero Z-scores if dimensions don't match
+    return {
+      width: curr.width,
+      height: curr.height,
+      lon0: curr.lon0,
+      lat0: curr.lat0,
+      pxSize: curr.pxSize,
+      data: new Float32Array(curr.data.length).fill(0),
+      epsg: curr.epsg,
+    };
   }
 
   const zData = new Float32Array(curr.data.length);
