@@ -18,6 +18,7 @@ build/
 
 # Local data
 local-data/
+local-data-*/
 
 # Environment
 .env.local

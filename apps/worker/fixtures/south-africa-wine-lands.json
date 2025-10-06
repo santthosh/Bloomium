@@ -1,7 +1,7 @@
 {
-  "aoi_id": "demo-aoi-1",
-  "name": "California Central Valley Demo",
-  "bbox": [-121.5, 38.2, -121.0, 38.6],
+  "aoi_id": "south-africa-wine-lands",
+  "name": "South Africa Wine Lands",
+  "bbox": [18.0, -34.5, 20.5, -33.0],
   "dates": [
     "2025-08-01",
     "2025-08-08",
@@ -11,4 +11,3 @@
     "2025-09-08"
   ]
 }
-

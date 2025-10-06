@@ -32,7 +32,7 @@ export class AOIProcessor {
   private async processDate(aoi: AOIInput, date: string): Promise<void> {
     console.log(`\n📅 Processing date: ${date}`);
 
-    const zoomLevels = [5, 6, 7]; // Generate tiles at these zoom levels
+    const zoomLevels = [7, 8, 9, 10, 11, 12, 13, 14]; // Generate tiles from zoom 7-14
     let totalTiles = 0;
 
     for (const zoom of zoomLevels) {
@@ -40,12 +40,12 @@ export class AOIProcessor {
       console.log(`   Zoom ${zoom}: ${tiles.length} tiles`);
 
       for (const coord of tiles) {
-        // Generate bloom tile
-        const bloomTile = await this.tileGenerator.generateBloomTile(coord, date);
+        // Generate bloom tile with AOI masking
+        const bloomTile = await this.tileGenerator.generateBloomTile(coord, date, aoi.bbox);
         await this.storage.writeTile(aoi.aoi_id, date, 'bloom', coord.z, coord.x, coord.y, bloomTile);
 
-        // Generate anomaly tile
-        const anomalyTile = await this.tileGenerator.generateAnomalyTile(coord, date);
+        // Generate anomaly tile with AOI masking
+        const anomalyTile = await this.tileGenerator.generateAnomalyTile(coord, date, aoi.bbox);
         await this.storage.writeTile(aoi.aoi_id, date, 'anomaly', coord.z, coord.x, coord.y, anomalyTile);
 
         totalTiles++;

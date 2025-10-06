@@ -11,7 +11,7 @@ export class TileGenerator {
   /**
    * Generate a bloom probability tile (gradient from blue to red)
    */
-  async generateBloomTile(coord: TileCoord, date: string): Promise<Buffer> {
+  async generateBloomTile(coord: TileCoord, date: string, aoiBbox?: [number, number, number, number]): Promise<Buffer> {
     const { x, y, z } = coord;
     
     // Create gradient based on tile coordinates and date
@@ -22,9 +22,32 @@ export class TileGenerator {
     const height = this.TILE_SIZE;
     const pixels = Buffer.alloc(width * height * 4);
 
+    // Get tile bounds for masking
+    const tileBounds = this.getTileBounds(coord);
+
     for (let py = 0; py < height; py++) {
       for (let px = 0; px < width; px++) {
         const i = (py * width + px) * 4;
+        
+        // Calculate pixel lat/lon within the tile
+        const pixelLat = tileBounds.north - (py / height) * (tileBounds.north - tileBounds.south);
+        const pixelLon = tileBounds.west + (px / width) * (tileBounds.east - tileBounds.west);
+        
+        // Check if pixel is within AOI bounds (mask out ocean/outside areas)
+        let isInAOI = true;
+        if (aoiBbox) {
+          const [west, south, east, north] = aoiBbox;
+          isInAOI = pixelLon >= west && pixelLon <= east && pixelLat >= south && pixelLat <= north;
+        }
+        
+        if (!isInAOI) {
+          // Transparent for areas outside AOI
+          pixels[i] = 0;     // R
+          pixels[i + 1] = 0; // G
+          pixels[i + 2] = 0; // B
+          pixels[i + 3] = 0; // Alpha (transparent)
+          continue;
+        }
         
         // Create a gradient effect
         const normalizedX = px / width;
@@ -63,7 +86,7 @@ export class TileGenerator {
   /**
    * Generate an anomaly tile (z-score visualization)
    */
-  async generateAnomalyTile(coord: TileCoord, date: string): Promise<Buffer> {
+  async generateAnomalyTile(coord: TileCoord, date: string, aoiBbox?: [number, number, number, number]): Promise<Buffer> {
     const { x, y, z } = coord;
     
     const dateOffset = new Date(date).getTime() / 1000000000;
@@ -73,9 +96,32 @@ export class TileGenerator {
     const height = this.TILE_SIZE;
     const pixels = Buffer.alloc(width * height * 4);
 
+    // Get tile bounds for masking
+    const tileBounds = this.getTileBounds(coord);
+
     for (let py = 0; py < height; py++) {
       for (let px = 0; px < width; px++) {
         const i = (py * width + px) * 4;
+        
+        // Calculate pixel lat/lon within the tile
+        const pixelLat = tileBounds.north - (py / height) * (tileBounds.north - tileBounds.south);
+        const pixelLon = tileBounds.west + (px / width) * (tileBounds.east - tileBounds.west);
+        
+        // Check if pixel is within AOI bounds (mask out ocean/outside areas)
+        let isInAOI = true;
+        if (aoiBbox) {
+          const [west, south, east, north] = aoiBbox;
+          isInAOI = pixelLon >= west && pixelLon <= east && pixelLat >= south && pixelLat <= north;
+        }
+        
+        if (!isInAOI) {
+          // Transparent for areas outside AOI
+          pixels[i] = 0;     // R
+          pixels[i + 1] = 0; // G
+          pixels[i + 2] = 0; // B
+          pixels[i + 3] = 0; // Alpha (transparent)
+          continue;
+        }
         
         // Generate z-score like pattern
         const noise1 = Math.sin(seed + px * 0.05) * Math.cos(seed + py * 0.05);
@@ -147,6 +193,21 @@ export class TileGenerator {
       ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * n
     );
     return { z: zoom, x, y };
+  }
+
+  /**
+   * Get the geographic bounds of a tile
+   */
+  private getTileBounds(coord: TileCoord): { north: number; south: number; east: number; west: number } {
+    const { x, y, z } = coord;
+    const n = Math.pow(2, z);
+    
+    const west = (x / n) * 360 - 180;
+    const east = ((x + 1) / n) * 360 - 180;
+    const north = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
+    const south = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 1) / n))) * 180 / Math.PI;
+    
+    return { north, south, east, west };
   }
 }
 

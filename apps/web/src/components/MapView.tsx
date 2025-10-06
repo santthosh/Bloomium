@@ -1,9 +1,10 @@
 'use client';
 
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
-import { useState } from 'react';
+import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet';
+import { useState, useEffect } from 'react';
 import { Layer } from '@/types';
 import { getTileUrl } from '@/lib/api';
+import { getAOIConfig } from '@/config/aois';
 import PixelPopup from './PixelPopup';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,6 +27,19 @@ function MapClickHandler({
   return null;
 }
 
+function MapUpdater({ aoiId }: { aoiId: string }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    const aoiConfig = getAOIConfig(aoiId);
+    if (aoiConfig) {
+      map.setView(aoiConfig.center, aoiConfig.zoom);
+    }
+  }, [aoiId, map]);
+  
+  return null;
+}
+
 export default function MapView({ layer, date, aoiId }: MapViewProps) {
   const [clickedPosition, setClickedPosition] = useState<{
     lat: number;
@@ -37,12 +51,13 @@ export default function MapView({ layer, date, aoiId }: MapViewProps) {
   };
 
   const tileUrl = getTileUrl(layer, aoiId, date);
+  const aoiConfig = getAOIConfig(aoiId) || { center: [38.4, -121.25] as [number, number], zoom: 10 };
 
   return (
     <>
       <MapContainer
-        center={[38.4, -121.25]}
-        zoom={9}
+        center={aoiConfig.center}
+        zoom={aoiConfig.zoom}
         className="h-full w-full relative z-0"
         zoomControl={true}
       >
@@ -58,6 +73,7 @@ export default function MapView({ layer, date, aoiId }: MapViewProps) {
         />
 
         <MapClickHandler onMapClick={handleMapClick} />
+        <MapUpdater aoiId={aoiId} />
       </MapContainer>
 
       {clickedPosition && (

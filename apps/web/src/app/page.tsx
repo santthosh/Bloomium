@@ -20,7 +20,7 @@ const MapView = dynamic(() => import('@/components/MapView'), {
 export default function Home() {
   const [selectedLayer, setSelectedLayer] = useState<Layer>('bloom');
   const [selectedDate, setSelectedDate] = useState<string>('2025-09-01');
-  const [aoiId, setAoiId] = useState<string>('demo-aoi-1');
+  const [aoiId, setAoiId] = useState<string>('california-central-valley');
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -80,6 +80,7 @@ export default function Home() {
           selectedDate={selectedDate}
           onDateChange={setSelectedDate}
           aoiId={aoiId}
+          onAoiChange={setAoiId}
           availableDates={availableDates}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}

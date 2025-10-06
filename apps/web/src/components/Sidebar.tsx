@@ -1,4 +1,5 @@
 import { Layer } from '@/types';
+import { AVAILABLE_AOIS } from '@/config/aois';
 
 interface SidebarProps {
   selectedLayer: Layer;
@@ -6,6 +7,7 @@ interface SidebarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
   aoiId: string;
+  onAoiChange: (aoiId: string) => void;
   availableDates: string[];
   isOpen?: boolean;
   onClose?: () => void;
@@ -17,6 +19,7 @@ export default function Sidebar({
   selectedDate,
   onDateChange,
   aoiId,
+  onAoiChange,
   availableDates,
   isOpen = false,
   onClose,
@@ -30,6 +33,13 @@ export default function Sidebar({
 
   const handleDateChange = (date: string) => {
     onDateChange(date);
+    if (onClose && window.innerWidth < 1024) {
+      onClose();
+    }
+  };
+
+  const handleAoiChange = (newAoiId: string) => {
+    onAoiChange(newAoiId);
     if (onClose && window.innerWidth < 1024) {
       onClose();
     }
@@ -49,39 +59,28 @@ export default function Sidebar({
       `}
     >
       <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-        {/* Layer Selection */}
+        {/* AOI Selection */}
         <div>
           <h2 className="text-base font-semibold text-space-navy mb-3">
-            Layer
+            Area of Interest
           </h2>
           <div className="space-y-2">
-            <button
-              onClick={() => handleLayerChange('bloom')}
-              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
-                selectedLayer === 'bloom'
-                  ? 'bg-gradient-to-r from-petal-pink to-petal-pink-400 text-white shadow-lg'
-                  : 'bg-white text-space-navy hover:bg-petal-pink-50 border border-petal-pink-200'
-              }`}
-            >
-              <div className="text-sm font-medium">🌸 Bloom Probability</div>
-              <div className="text-xs opacity-90">
-                {selectedLayer === 'bloom' ? 'Active' : 'Show bloom patterns'}
-              </div>
-            </button>
-            
-            <button
-              onClick={() => handleLayerChange('anomaly')}
-              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
-                selectedLayer === 'anomaly'
-                  ? 'bg-gradient-to-r from-sky-blue to-sky-blue-600 text-white shadow-lg'
-                  : 'bg-white text-space-navy hover:bg-sky-blue-50 border border-sky-blue-200'
-              }`}
-            >
-              <div className="text-sm font-medium">📊 Anomaly (Z-Score)</div>
-              <div className="text-xs opacity-90">
-                {selectedLayer === 'anomaly' ? 'Active' : 'Show anomalies'}
-              </div>
-            </button>
+            {AVAILABLE_AOIS.map((aoi) => (
+              <button
+                key={aoi.id}
+                onClick={() => handleAoiChange(aoi.id)}
+                className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
+                  aoiId === aoi.id
+                    ? 'bg-gradient-to-r from-leaf-green to-leaf-green-600 text-white shadow-lg'
+                    : 'bg-white text-space-navy hover:bg-leaf-green-50 border border-leaf-green-200'
+                }`}
+              >
+                <div className="text-sm font-medium">🌍 {aoi.name}</div>
+                <div className="text-xs opacity-90 font-mono">
+                  {aoiId === aoi.id ? 'Active' : aoi.id}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -152,14 +151,39 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* AOI Info */}
+        {/* Layer Selection */}
         <div className="pt-4 border-t border-sky-blue-200">
           <h2 className="text-base font-semibold text-space-navy mb-3">
-            Area of Interest
+            Layer
           </h2>
-          <div className="px-4 py-3 bg-white rounded-xl border border-sky-blue-200 shadow-sm">
-            <div className="text-[10px] text-space-navy-600 font-medium">AOI ID</div>
-            <div className="font-mono text-xs text-space-navy font-bold">{aoiId}</div>
+          <div className="space-y-2">
+            <button
+              onClick={() => handleLayerChange('bloom')}
+              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
+                selectedLayer === 'bloom'
+                  ? 'bg-gradient-to-r from-petal-pink to-petal-pink-400 text-white shadow-lg'
+                  : 'bg-white text-space-navy hover:bg-petal-pink-50 border border-petal-pink-200'
+              }`}
+            >
+              <div className="text-sm font-medium">🌸 Bloom Probability</div>
+              <div className="text-xs opacity-90">
+                {selectedLayer === 'bloom' ? 'Active' : 'Show bloom patterns'}
+              </div>
+            </button>
+            
+            <button
+              onClick={() => handleLayerChange('anomaly')}
+              className={`w-full px-4 py-3 rounded-xl text-left transition-all transform hover:scale-[1.02] ${
+                selectedLayer === 'anomaly'
+                  ? 'bg-gradient-to-r from-sky-blue to-sky-blue-600 text-white shadow-lg'
+                  : 'bg-white text-space-navy hover:bg-sky-blue-50 border border-sky-blue-200'
+              }`}
+            >
+              <div className="text-sm font-medium">📊 Anomaly (Z-Score)</div>
+              <div className="text-xs opacity-90">
+                {selectedLayer === 'anomaly' ? 'Active' : 'Show anomalies'}
+              </div>
+            </button>
           </div>
         </div>
 
