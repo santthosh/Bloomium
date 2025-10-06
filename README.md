@@ -1,8 +1,37 @@
+<div align="center">
+
+<img src="apps/web/public/bloomium-logo-flower.png" alt="Bloomium Logo" width="300"/>
+
 # 🪷 Bloomium
 
 **Global Flowering Phenology Visualization Platform**
 
+[![Deploy to Google Cloud](https://github.com/santthosh/Bloomium/actions/workflows/deploy.yml/badge.svg)](https://github.com/santthosh/Bloomium/actions/workflows/deploy.yml)
+[![License: ELv2](https://img.shields.io/badge/License-ELv2-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green)](https://nodejs.org/)
+
 Bloomium uses Earth observation data (Sentinel-2) to visualize flowering patterns across the globe. Explore bloom maps, compare time periods, and analyze anomalies in real-time.
+
+**🏆 Submitted to NASA Space Apps Challenge 2025**
+
+[Demo](#-demo) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Documentation](#-documentation)
+
+</div>
+
+---
+
+## 🎬 Demo
+
+![Bloomium Demo](docs/bloomium-demo.gif)
+
+Bloomium provides an interactive map interface for exploring flowering patterns across multiple regions worldwide. The platform visualizes:
+- **Bloom Probability Maps**: Real-time flowering detection using Anthocyanin Reflectance Index (ARI)
+- **Anomaly Detection**: Statistical analysis highlighting unusual blooming patterns
+- **Time Series Analysis**: Track flowering trends over multiple observation periods
+- **Multi-Region Support**: Pre-configured areas including California's Central Valley, Japan's agricultural regions, and South Africa's wine lands
+
+Click any location on the map to explore detailed time series data, statistical metrics, and AI-generated natural language explanations of flowering patterns.
 
 ---
 
@@ -280,7 +309,17 @@ Bloomium helps researchers, ecologists, and nature enthusiasts track flowering p
 
 Built with TypeScript, optimized for serverless deployment on Google Cloud Platform.
 
+### NASA Space Apps Challenge 2025
+
+This project was developed as part of the **NASA Space Apps Challenge 2025**, leveraging NASA's Earth observation data and Sentinel-2 satellite imagery to address global flowering phenology monitoring. By combining advanced remote sensing techniques with modern web technologies, Bloomium demonstrates how space-based data can be made accessible and actionable for environmental research and conservation efforts.
+
 ---
 
+<div align="center">
+
 **Happy Blooming! 🪷**
+
+Made with 💚 for Earth observation and ecological research
+
+</div>
 
